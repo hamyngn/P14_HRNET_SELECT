@@ -1,23 +1,11 @@
-import logo from './logo.svg';
+import SelectCustom from "./components/SelectCustom"
 import './App.css';
+import states from './data'
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <SelectCustom labelFor="state" data={states} value="abbreviation" text="name"/>
     </div>
   );
 }

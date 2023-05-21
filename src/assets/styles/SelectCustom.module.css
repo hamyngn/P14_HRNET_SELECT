@@ -1,0 +1,89 @@
+.container {
+    position: relative;
+    height: 90px;
+    width: 430px;
+}
+
+.selectMenuButton {
+    display: flex;
+    font-family: Arial,Helvetica,sans-serif;
+    background-color: #f6f6f6;
+    font-size: 1em;
+    font-weight: normal;
+    border-radius: 3px;
+    color: #454545;
+    border: 1px solid #c5c5c5;
+    line-height: normal;
+    margin-right: 0.1em;
+    cursor: pointer;
+    vertical-align: middle;
+    overflow: visible;
+    text-align: left;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16.5px 14px;
+}
+
+.selectMenuButton:active {
+    border: 1px solid #003eff;
+    background: #007fff;
+    font-weight: normal;
+    color: #ffffff;
+}
+
+.selectMenuText {
+    display: block;
+    margin-right: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.uiCornerTop {
+    border-radius: 0;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+  }
+
+.list {
+    position: absolute;
+    top: 35px; 
+    left: 0px;
+    z-index: 100;
+    background-color: #ffffff;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.selectMenuMenu {
+    border: 1px solid #c5c5c5;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    background-color: #ffffff;
+}
+
+ul {
+    list-style-type: none;
+    padding: 10px;
+    margin: 0;
+}
+
+ul li:hover {
+    background-color: #007fff;
+}
+
+.selectMenuIcon, .selectIcon {
+    width: 16px;
+    height: 16px;
+}
+
+@media (max-width: 575px) {
+    .container {
+        width: 96%;
+    }
+    .selectMenuButton {
+        padding: 10px;
+    }
+}
