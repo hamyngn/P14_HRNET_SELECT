@@ -1,3 +1,10 @@
+Install
+Clone the following repository on your computer
+
+Open your local folder in your code editor then, in a new terminal, run npm install
+
+You are all ready.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
