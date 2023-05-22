@@ -5,7 +5,7 @@ import states from './data'
 function App() {
   return (
     <div className="App">
-      <SelectCustom labelFor="state" data={states} value="abbreviation" text="name"/>
+      <SelectCustom id="state" label="State" data={states} value="abbreviation" text="name"/>
     </div>
   );
 }
