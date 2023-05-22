@@ -1,5 +1,5 @@
-Install
-Clone the following repository on your computer
+# Install
+Clone the following repository on your computer https://github.com/hamyngn/P14_HRNET_SELECT.git
 
 Open your local folder in your code editor then, in a new terminal, run npm install
 
