@@ -13,9 +13,12 @@ const SelectCustom = ({label, id, data, value, text, onChange}) => {
     const [isFocus, setIsFocus] = useState(false)
     // State to track options
     const [options, setOptions] = useState(null)
+    // State to track selected list index
+    const [selectedIndex, setSelectedIndex] = useState(null)
 
     const refButton = useRef()
     const refDropDown = useRef()
+    const listRef = useRef([])
     
     useEffect (()=> {
         if(data.length) {
@@ -37,13 +40,22 @@ const SelectCustom = ({label, id, data, value, text, onChange}) => {
         }
     }
 
+    useEffect(() => {
+        if(showList && selectedIndex) {
+            if(document.activeElement !== null && document.activeElement !== listRef.current[selectedIndex]){
+                listRef.current[selectedIndex].focus()
+            }
+        }
+    }, [showList, selectedIndex])
+
     // handle list selected
-    const handleClick = (value, text) => {
+    const handleClick = (value, text, index) => {
         if(onChange) {
             onChange(value)
         }
         setSelectText(text)
         setShowList(false)
+        setSelectedIndex(index)
         buttonFocus()
         refButton.current.classList.remove(`${styles.uiCornerTop}`) 
     }
@@ -52,8 +64,12 @@ const SelectCustom = ({label, id, data, value, text, onChange}) => {
     const createList = () => {
         const lists = data.map((data, index) =>
         <li 
-            onClick={() => handleClick(data[value], data[text])} 
+            onClick={() => handleClick(data[value], data[text], index)} 
             key={index}
+            tabIndex={-1}
+            role={"option"}
+            aria-selected = {index === selectedIndex ? true : false}
+            ref={el => listRef.current[index] = el}
         >
             {data[text]}
         </li>

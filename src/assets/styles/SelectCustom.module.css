@@ -32,6 +32,10 @@
     color: #ffffff;
 }
 
+.selectMenuButton:hover {
+    background-color: #dcdcdc9f;
+}
+
 .selectMenuText {
     display: block;
     margin-right: 20px;
@@ -71,6 +75,10 @@ ul {
 }
 
 ul li:hover {
+    background-color: #007fff;
+}
+
+li:focus {
     background-color: #007fff;
 }
 
