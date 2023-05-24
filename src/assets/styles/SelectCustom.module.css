@@ -32,7 +32,7 @@
     color: #ffffff;
 }
 
-.selectMenuButton:hover {
+.selectMenuButton:hover, .selectMenuButton:focus {
     background-color: #dcdcdc9f;
 }
 
@@ -85,6 +85,11 @@ li:focus {
 .selectMenuIcon, .selectIcon {
     width: 16px;
     height: 16px;
+}
+
+.disabled {
+    pointer-events: none;
+    background-color: #c5c5c5;
 }
 
 @media (max-width: 575px) {
