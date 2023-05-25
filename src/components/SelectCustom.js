@@ -2,6 +2,7 @@ import React, {useState, useRef, useEffect} from "react";
 import styles from '../assets/styles/SelectCustom.module.css'
 import {ReactComponent as SelectIcon} from '../assets/images/caret-down-solid.svg';
 import PropTypes from 'prop-types';
+import {useSelectButtonText} from "../hooks/useSelectButtonText"
 
 /* if data = [
     {
@@ -18,9 +19,10 @@ import PropTypes from 'prop-types';
     }];
     value = "abbreviation";
     text = "name";
-    disabled = ["AL", "AK"] to set these items disabled
+    disabled = ["AL", "AK"] to set these items disabled;
+    hidden = ["AS"] to set this item hidden
 */
-const SelectCustom = ({label, id, data, value, text, onChange, disabled}) => {
+const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}) => {
     // State to track if the list is showed or not
     const [showList, setShowList] = useState(false)
     // State to track the selected option text
@@ -37,19 +39,54 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled}) => {
     const refButton = useRef()
     const refDropDown = useRef()
     const listRef = useRef([])
-    
+
+    //TODO: selectText is not correct
+    const selectTextHandle = () => {
+        //when there is hidden item and no disabled item
+        if((hidden && hidden.length && !disabled) || (hidden && hidden.length && disabled && !disabled.length)){
+            console.log("hide")
+            for(let i=0; i < hidden.length; i+=1) {
+                for (let j=0; j < data.length; j+=1) {
+                    if(hidden[i] !== data[j][value]) {
+                        setSelectText(data[j][text])
+                        break;
+                    }
+                }
+            }
+        }
+
+        //when there is disabled item and no hidden item
+        if((disabled && disabled.length && !hidden) || (disabled && disabled.length && hidden && !hidden.length)){
+            for(let i=0; i < disabled.length; i+=1) {
+                for (let j=0; j < data.length; j+=1) {
+                    if(disabled[i] !== data[j][value]) {
+                        console.log(data[j][value])
+                        setSelectText(data[j][text])
+                        break;
+                    }
+                }
+            }
+        }
+
+        //when there is no disabled or hidden item
+        if(!hidden && !disabled) {
+            setSelectText(data[0][text])
+            console.log("no hide no dis")
+        }
+    }
+
     useEffect (()=> {
-        if(data.length) {
+        if(data && data.length) {
             const options = data.map((data, index) =>
             <option value={data[value]} key={index}>{data[text]}</option>
             )
             setOptions(options)
-            setSelectText(data[0][text])
+            selectTextHandle();
         } else {
             return;
         }
     }, [data])
-
+    
     // show and hide list
     const handleShowList = () => {
         refButton.current.classList.add(`${styles.uiCornerTop}`)
@@ -59,20 +96,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled}) => {
             refButton.current.classList.remove(`${styles.uiCornerTop}`) 
         }
     }
-
-    // set focus on selected list item if menu is opened
-    useEffect(() => {
-        if(showList && selectedIndex) {
-                listRef.current[selectedIndex].focus()
-        }   
-    }, [showList, selectedIndex])
-
-    // when there're no list item selected, set focus on the first item if menu is opened
-    useEffect(() => {
-        if(list !==null && showList && selectedIndex === null) {
-            listRef.current[0].focus()
-        }
-    }, [showList, selectedIndex, list])
 
     // handle list selected
     const handleClick = (value, text, index) => {
@@ -91,10 +114,10 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled}) => {
         if(e.code === "Enter") {
             listRef.current[index].click()
         }
-        if(e.code === "ArrowDown") {
+        if(e.code === "ArrowDown" && list && showList && index < list.length) {
             listRef.current[index+1].focus()
         }
-        if(e.code === "ArrowUp") {
+        if(e.code === "ArrowUp" && index >= 1) {
             listRef.current[index-1].focus()
         }
     }
@@ -117,9 +140,9 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled}) => {
         setList(lists)
     }
 
-    // set disabled list item
     useEffect(() => {
-        if(disabled && list) {
+        // set disabled list item
+        if(disabled && disabled.length && list && showList) {
             disabled.map((i) => {
                 data.map((data, index) => {
                     if(i === data[value]) {
@@ -128,7 +151,45 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled}) => {
                 })  
             })
         }
-    }, [disabled, list])
+
+        // set hidden list item
+        if(hidden && hidden.length && list && showList) {
+            hidden.map((i) => {
+                data.map((data, index) => {
+                    if(i === data[value]) {
+                        listRef.current[index].hidden = true
+                    }
+                })  
+            })
+        }
+
+        const ifDisabled = (item) => {
+            const res = item.classList.contains(`${styles.disabled}`)
+            return res;
+        }
+
+        // set focus to first list item if there is no selected item
+        if(list && showList && selectedIndex === null) {
+            if(hidden && hidden.length || disabled && disabled.length) {
+                for(let i = 0; i < list.length; i++) {
+                    //check if item is disabled or hidden
+                    const thisItem = listRef.current[i]
+                    if(thisItem.getAttribute("hidden") === null && !ifDisabled(thisItem) || thisItem.getAttribute("hidden") === false && !ifDisabled(thisItem)){
+                        thisItem.focus()
+                        break
+                    }
+                    }  
+                }
+            else {
+                listRef.current[0].focus()
+            }        
+    }
+
+        // if there is selected item and menu is opened, set focus on selected list item
+        if(showList && selectedIndex) {
+            listRef.current[selectedIndex].focus()
+        } 
+    }, [disabled, hidden, list, showList, selectedIndex])
 
     // Delay rendering the menu items until the button receives focus.
 	// The menu may have already been rendered via a programmatic open.
