@@ -187,7 +187,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         // show list items when press Enter key on select Button
         const handleButtonKeyDown = (e) => {
             if(refButton.current && refButton.current.contains(e.target) && e.code === "Enter") {
-                setShowList(false);
+                setShowList(!showList);
             }
         }
         document.addEventListener("mousedown", handleButtonKeyDown);
