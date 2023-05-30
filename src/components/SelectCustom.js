@@ -35,57 +35,22 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     const [options, setOptions] = useState(null)
     // State to track selected list index
     const [selectedIndex, setSelectedIndex] = useState(null)
+    const buttonText = useSelectButtonText(data, hidden, disabled, text, value)
 
     const refButton = useRef()
     const refDropDown = useRef()
     const listRef = useRef([])
-
-    //TODO: selectText is not correct
-    const selectTextHandle = () => {
-        //when there is hidden item and no disabled item
-        if((hidden && hidden.length && !disabled) || (hidden && hidden.length && disabled && !disabled.length)){
-            console.log("hide")
-            for(let i=0; i < hidden.length; i+=1) {
-                for (let j=0; j < data.length; j+=1) {
-                    if(hidden[i] !== data[j][value]) {
-                        setSelectText(data[j][text])
-                        break;
-                    }
-                }
-            }
-        }
-
-        //when there is disabled item and no hidden item
-        if((disabled && disabled.length && !hidden) || (disabled && disabled.length && hidden && !hidden.length)){
-            for(let i=0; i < disabled.length; i+=1) {
-                for (let j=0; j < data.length; j+=1) {
-                    if(disabled[i] !== data[j][value]) {
-                        console.log(data[j][value])
-                        setSelectText(data[j][text])
-                        break;
-                    }
-                }
-            }
-        }
-
-        //when there is no disabled or hidden item
-        if(!hidden && !disabled) {
-            setSelectText(data[0][text])
-            console.log("no hide no dis")
-        }
-    }
-
-    useEffect (()=> {
+    
+    useEffect(() => {
         if(data && data.length) {
             const options = data.map((data, index) =>
             <option value={data[value]} key={index}>{data[text]}</option>
             )
             setOptions(options)
-            selectTextHandle();
         } else {
             return;
         }
-    }, [data])
+    }, [data, text, value])
     
     // show and hide list
     const handleShowList = () => {
@@ -97,54 +62,11 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         }
     }
 
-    // handle list selected
-    const handleClick = (value, text, index) => {
-        if(onChange) {
-            onChange(value)
-        }
-        setSelectText(text)
-        setShowList(false)
-        setSelectedIndex(index)
-        buttonFocus()
-        refButton.current.classList.remove(`${styles.uiCornerTop}`)
-    }
-
-    // handle key press on list items
-    const handleListKeyDown = (e, index) => {
-        if(e.code === "Enter") {
-            listRef.current[index].click()
-        }
-        if(e.code === "ArrowDown" && list && showList && index < list.length) {
-            listRef.current[index+1].focus()
-        }
-        if(e.code === "ArrowUp" && index >= 1) {
-            listRef.current[index-1].focus()
-        }
-    }
-
-    // create list of options
-    const createList = () => {
-        const lists = data.map((data, index) =>
-        <li 
-            key={`${id}-menu-item-${index}`}
-            tabIndex={-1}
-            role={"option"}
-            aria-selected = {index === selectedIndex ? true : false}
-            ref={el => listRef.current[index] = el}
-            onClick={() => handleClick(data[value], data[text], index)} 
-            onKeyDown={(e) => handleListKeyDown(e,index)}
-        >
-            {data[text]}
-        </li>
-        )
-        setList(lists)
-    }
-
     useEffect(() => {
         // set disabled list item
         if(disabled && disabled.length && list && showList) {
-            disabled.map((i) => {
-                data.map((data, index) => {
+            disabled.forEach((i) => {
+                data.forEach((data, index) => {
                     if(i === data[value]) {
                         listRef.current[index].classList.add(`${styles.disabled}`)
                     }
@@ -154,8 +76,8 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 
         // set hidden list item
         if(hidden && hidden.length && list && showList) {
-            hidden.map((i) => {
-                data.map((data, index) => {
+            hidden.forEach((i) => {
+                data.forEach((data, index) => {
                     if(i === data[value]) {
                         listRef.current[index].hidden = true
                     }
@@ -170,11 +92,11 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 
         // set focus to first list item if there is no selected item
         if(list && showList && selectedIndex === null) {
-            if(hidden && hidden.length || disabled && disabled.length) {
+            if((hidden && hidden.length) || (disabled && disabled.length)) {
                 for(let i = 0; i < list.length; i++) {
                     //check if item is disabled or hidden
                     const thisItem = listRef.current[i]
-                    if(thisItem.getAttribute("hidden") === null && !ifDisabled(thisItem) || thisItem.getAttribute("hidden") === false && !ifDisabled(thisItem)){
+                    if((thisItem.getAttribute("hidden") === null && !ifDisabled(thisItem)) || (thisItem.getAttribute("hidden") === false && !ifDisabled(thisItem))){
                         thisItem.focus()
                         break
                     }
@@ -189,15 +111,56 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         if(showList && selectedIndex) {
             listRef.current[selectedIndex].focus()
         } 
-    }, [disabled, hidden, list, showList, selectedIndex])
+    }, [data, value, disabled, hidden, list, showList, selectedIndex])
 
     // Delay rendering the menu items until the button receives focus.
 	// The menu may have already been rendered via a programmatic open.
     useEffect(() => {
+        // handle list selected
+        const handleClick = (value, text, index) => {
+            if(onChange) {
+                onChange(value)
+            }
+            setSelectText(text)
+            setShowList(false)
+            setSelectedIndex(index)
+            buttonFocus()
+            refButton.current.classList.remove(`${styles.uiCornerTop}`)
+        }
+        // handle key press on list items
+        const handleListKeyDown = (e, index) => {
+            if(e.code === "Enter") {
+                listRef.current[index].click()
+            }
+            if(e.code === "ArrowDown" && list && showList && index < list.length) {
+                listRef.current[index+1].focus()
+            }
+            if(e.code === "ArrowUp" && index >= 1) {
+                listRef.current[index-1].focus()
+            }
+        }
+        // create list of options
+        const createList = () => {
+            const lists = data.map((data, index) =>
+            <li 
+                key={`${id}-menu-item-${index}`}
+                tabIndex={-1}
+                role={"option"}
+                aria-selected = {index === selectedIndex ? true : false}
+                ref={el => listRef.current[index] = el}
+                onClick={() => handleClick(data[value], data[text], index)} 
+                onKeyDown={(e) => handleListKeyDown(e,index)}
+            >
+                {data[text]}
+            </li>
+            )
+            setList(lists)
+        }
+
         if(isFocus === true) {
             createList();
         }
-    }, [isFocus])
+    }, [isFocus, data, id, value, text, selectedIndex, onChange, showList])
     
     // Associate existing label with the new button
     const buttonFocus = () => {
@@ -218,14 +181,21 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             // Unbind the event listener on clean up
             document.removeEventListener("mousedown", handleClickOutside);
           };
-    }, [refDropDown])
+    }, [])
 
-    // show list items when press Enter key on select Button
-    const handleButtonKeyDown = (e) => {
-        if(e.code === "Enter") {
-            handleShowList()
+    useEffect(() => {
+        // show list items when press Enter key on select Button
+        const handleButtonKeyDown = (e) => {
+            if(refButton.current && refButton.current.contains(e.target) && e.code === "Enter") {
+                setShowList(false);
+            }
         }
-    }
+        document.addEventListener("mousedown", handleButtonKeyDown);
+        return () => {
+            // Unbind the event listener on clean up
+            document.removeEventListener("mousedown", handleButtonKeyDown);
+          };
+    }, [])
 
     // remove focus on focused list item on mouse move
     const handleMouseMove = () => {
@@ -261,7 +231,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             aria-controls={`${id}-menu`}
 			aria-haspopup = "true"
             >
-                <span className={styles.selectMenuText}>{selectText}</span>
+                <span className={styles.selectMenuText}>{selectText? selectText : buttonText}</span>
                 <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
             </span>
             { showList &&
@@ -293,7 +263,8 @@ SelectCustom.propTypes = {
     value: PropTypes.string,
     text: PropTypes.string,
     onChange: PropTypes.func,
-    disabled: PropTypes.arrayOf(PropTypes.string)
+    disabled: PropTypes.arrayOf(PropTypes.string),
+    hidden:  PropTypes.arrayOf(PropTypes.string)
 }
 
 export default SelectCustom;

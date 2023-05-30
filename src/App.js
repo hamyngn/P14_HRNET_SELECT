@@ -10,7 +10,7 @@ function App() {
   }, [state])
   return (
     <div className="App">
-      <SelectCustom id="state" label="State" disabled={["AL","CA"]} hidden={[]} data={states} value="abbreviation" text="name" onChange={(value) => setState(value)}/>
+      <SelectCustom id="state" label="State" disabled={["AL"]} hidden={["CA"]} data={states} value="abbreviation" text="name" onChange={(value) => setState(value)}/>
     </div>
   );
 }
