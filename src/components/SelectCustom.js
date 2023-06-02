@@ -35,7 +35,12 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     const [options, setOptions] = useState(null)
     // State to track selected list index
     const [selectedIndex, setSelectedIndex] = useState(null)
-    const buttonText = useSelectButtonText(data, hidden, disabled, text, value)
+
+    // text of select button
+    const buttonText = useSelectButtonText(data, hidden, disabled, text, value).selectText
+
+    // index of focused list item
+    const focusedItemIndex = useSelectButtonText(data, hidden, disabled, text, value).index
 
     const refButton = useRef()
     const refDropDown = useRef()
@@ -55,8 +60,8 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     // show and hide list
     const handleShowList = () => {
         refButton.current.classList.add(`${styles.uiCornerTop}`)
-        setShowList(!showList)
-        setIsFocus(!isFocus)
+        setShowList(current => !current)
+        setIsFocus(current => !current)
         if(showList) {
             refButton.current.classList.remove(`${styles.uiCornerTop}`) 
         }
@@ -85,33 +90,67 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             })
         }
 
-        const ifDisabled = (item) => {
-            const res = item.classList.contains(`${styles.disabled}`)
-            return res;
-        }
-
         // set focus to first list item if there is no selected item
         if(list && showList && selectedIndex === null) {
-            if((hidden && hidden.length) || (disabled && disabled.length)) {
-                for(let i = 0; i < list.length; i++) {
-                    //check if item is disabled or hidden
-                    const thisItem = listRef.current[i]
-                    if((thisItem.getAttribute("hidden") === null && !ifDisabled(thisItem)) || (thisItem.getAttribute("hidden") === false && !ifDisabled(thisItem))){
-                        thisItem.focus()
-                        break
-                    }
-                    }  
-                }
-            else {
-                listRef.current[0].focus()
-            }        
-    }
+            listRef.current[focusedItemIndex].focus()
+        }
 
         // if there is selected item and menu is opened, set focus on selected list item
         if(showList && selectedIndex) {
             listRef.current[selectedIndex].focus()
         } 
     }, [data, value, disabled, hidden, list, showList, selectedIndex])
+
+    const handleListKeyDown = (event, index) => {
+        event.preventDefault()
+        if(listRef.current[index] && listRef.current[index].contains(event.target)) {
+            if(event.code === "Enter") {
+                listRef.current[index].click()
+            }
+            if(event.code === "ArrowDown" && list) {
+                if(index < list.length - 1) {
+                    for(let i = index + 1; i < list.length; i +=1) {
+                        const item = listRef.current[i]
+                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                            item.focus()
+                            listRef.current[index].blur()
+                            console.log(i)
+                            break
+                        }
+                    }
+                } else {
+                    listRef.current[focusedItemIndex].focus()
+                    listRef.current[index].blur()
+                    console.log(focusedItemIndex + 'focused')
+                }
+            }
+
+            //todo: handle first item disabled
+            if(event.code === "ArrowUp" && list) {
+                if(index >= 1) {
+                    for(let i = index -1; i >= 0; i -= 1) {
+                        const item = listRef.current[i]
+                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                            item.focus()
+                            listRef.current[index].blur()
+                            break
+                        }
+                    }
+                } else {
+                    for(let i = list.length-1; i >= 0; i -= 1) {
+                        const item = listRef.current[i]
+                        if(!item.contains(`${styles.disabled}`) && !item.hidden) {
+                            item.focus()
+                            listRef.current[index].blur()
+                            console.log(index + "foc")
+                            break
+                        }
+                    } 
+                }
+            } 
+        }
+    }
+   
 
     // Delay rendering the menu items until the button receives focus.
 	// The menu may have already been rendered via a programmatic open.
@@ -127,18 +166,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             buttonFocus()
             refButton.current.classList.remove(`${styles.uiCornerTop}`)
         }
-        // handle key press on list items
-        const handleListKeyDown = (e, index) => {
-            if(e.code === "Enter") {
-                listRef.current[index].click()
-            }
-            if(e.code === "ArrowDown" && list && showList && index < list.length) {
-                listRef.current[index+1].focus()
-            }
-            if(e.code === "ArrowUp" && index >= 1) {
-                listRef.current[index-1].focus()
-            }
-        }
         // create list of options
         const createList = () => {
             const lists = data.map((data, index) =>
@@ -148,8 +175,8 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                 role={"option"}
                 aria-selected = {index === selectedIndex ? true : false}
                 ref={el => listRef.current[index] = el}
-                onClick={() => handleClick(data[value], data[text], index)} 
-                onKeyDown={(e) => handleListKeyDown(e,index)}
+                onClick={() => handleClick(data[value], data[text], index)}
+                onKeyDown={(e) => handleListKeyDown(e, index)}
             >
                 {data[text]}
             </li>
@@ -184,25 +211,36 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     }, [])
 
     useEffect(() => {
-        // show list items when press Enter key on select Button
         const handleButtonKeyDown = (e) => {
-            if(refButton.current && refButton.current.contains(e.target) && e.code === "Enter") {
-                setShowList(!showList);
+            e.preventDefault()
+            if(refButton.current && refButton.current.contains(e.target)) {
+                // show list items when press Enter key on select Button
+                if(e.code === "Enter"){
+                    handleShowList()
+                }
+                //todo: finish this
+                if(e.code === "ArrowDown"){
+                    if(selectedIndex) {
+                        setSelectText(listRef.current[selectedIndex].textContent)
+                    } else {
+                        setSelectText(listRef.current[focusedItemIndex].textContent)
+                    }
+                    
+                }     
             }
         }
         document.addEventListener("mousedown", handleButtonKeyDown);
         return () => {
-            // Unbind the event listener on clean up
             document.removeEventListener("mousedown", handleButtonKeyDown);
           };
-    }, [])
+    }, [selectedIndex, focusedItemIndex])
 
     // remove focus on focused list item on mouse move
     const handleMouseMove = () => {
         if (selectedIndex) {
             listRef.current[selectedIndex].blur()
         } else {
-            listRef.current[0].blur()
+            listRef.current[focusedItemIndex].blur()
         }
     }
 
