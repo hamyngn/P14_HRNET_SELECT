@@ -53,19 +53,35 @@ export function useSelectButtonText(data, hidden, disabled, text, value) {
     }
 
     //When there're both disabled and hidden items
-    //todo: check again this condition
     if (disabled && disabled.length && hidden && hidden.length) {
-        loop1: for(let j=0; j < data.length; j+=1){
+        for(let j=0; j < data.length; j+=1){
+            let ifNotDisabled;
+            let ifNotHidden;
             for(let i=0; i < disabled.length; i+=1) {
                 if(disabled[i] !== data[j][value]) {
-                    for(let k=0; k < hidden.length; k+=1){
-                        if(data[j][value] !== hidden[k]) {
-                            setSelectText(data[j][text])
-                            setIndex(j)
-                            break loop1;
-                        }
-                    }
-                } 
+                    ifNotDisabled = true
+                }
+                else {
+                    ifNotDisabled = false
+                    break
+                }
+            }
+            if(ifNotDisabled) {
+                for(let k=0; k < hidden.length; k+=1){
+                    if(data[j][value] !== hidden[k]) {
+                        ifNotHidden = true
+                }
+                else {
+                    ifNotHidden = false
+                    break
+                }
+                }
+            }
+            
+            if(ifNotDisabled && ifNotHidden) {
+                setSelectText(data[j][text])
+                setIndex(j)
+                break
             }
         }
     }
