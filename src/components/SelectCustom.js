@@ -133,7 +133,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             setSelectText(text)
             setShowList(false)
             setSelectedIndex(index)
-            setIsFocus(true)
+            buttonFocus()
             refButton.current.classList.remove(`${styles.uiCornerTop}`)
         }
 
@@ -181,6 +181,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
           };
     }, [])
     
+        // todo: handle button cancel
     const handleButtonKeyDown = (e) => {
         e.preventDefault()
         if(refButton.current && refButton.current.contains(e.target)) {
@@ -244,30 +245,31 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         }     
     }
 
-    // remove focus on focused list item on mouse move
-    const handleMouseMove = (e) => {
-        if(selectedIndex) {
-            listRef[selectedIndex].current.blur()
-        } else {
-            listRef[focusedItemIndex].current.blur()
-        }
-    }
-
-    // handle list keyDown
-    // todo: handle mouse
     let index;
     if(selectedIndex) {
         index = selectedIndex
     } else {
         index = focusedItemIndex
     }
+    // remove focus on focused list item on mouse move
+    const handleMouseMove = (e) => {
+        document.activeElement.blur()
+        e.target.focus()
+        if(e.target.tagName === 'LI') {
+            index = Array.from(e.target.parentElement.children).indexOf(e.target)
+            console.log(index)
+        }
+    }
+
+    // handle list keyDown
     const handleListKeyDown = (event) => { 
         event.preventDefault()
+        buttonFocus()
         if(index) {
             if(event.code === "Enter") {
                 listRef[index].current.click()
             }
-            if(event.code === "ArrowDown" && list) {
+            if(event.code === "ArrowDown" && list && listHandled) {
                 listRef[index].current.blur()
                 if(index < list.length - 1) {
                     for(let i = index + 1; i < list.length; i +=1) {
@@ -285,7 +287,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                 }
             }
 
-            if(event.code === "ArrowUp" && list) {
+            if(event.code === "ArrowUp" && list && listHandled) {
                 listRef[index].current.blur()
                 document.activeElement.blur()
                 if(index >= 1 && index !== focusedItemIndex) {

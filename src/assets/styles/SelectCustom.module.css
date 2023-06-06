@@ -36,6 +36,10 @@
     background-color: #dcdcdc9f;
 }
 
+.selectMenuButton:focus {
+    border: 1px solid black
+}
+
 .selectMenuText {
     display: block;
     margin-right: 20px;
@@ -78,7 +82,6 @@ ul {
 }
 
 ul li:hover {
-    background-color: #007fff;
     cursor: pointer;
 }
 
