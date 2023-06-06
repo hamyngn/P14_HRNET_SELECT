@@ -37,6 +37,8 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     const [selectedIndex, setSelectedIndex] = useState(null)
     // State to track listRefs
     const [listRef, setListRef] = useState([]);
+    // State to track if hidden and disabled items handled
+    const [listHandled, setListHandled] = useState(false)
 
     // text of select button
     const buttonText = useSelectButtonText(data, hidden, disabled, text, value).selectText
@@ -58,6 +60,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         }
     }, [data, text, value])
 
+    // create list items refs
     useEffect(() => {
         const elRefs = []
         if(data && data.length){
@@ -91,28 +94,31 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     }, [list, showList, selectedIndex, listRef, focusedItemIndex])
 
     useEffect(() => {
-        // set disabled list item
-        if(disabled && disabled.length && list && showList) {
-            disabled.forEach((i) => {
-                data.forEach((data, index) => {
-                    if(i === data[value]) {
-                        listRef[index].current.classList.add(`${styles.disabled}`)
-                    }
-                })  
-            })
-        }
+        const handleDisabledAndHidden = () => {
+            // set disabled list item
+            if(disabled && disabled.length && listHandled) {
+                disabled.forEach((i) => {
+                    data.forEach((data, index) => {
+                        if(i === data[value]) {
+                            listRef[index].current.classList.add(`${styles.disabled}`)
+                        }
+                    })  
+                })
+            }
 
-        // set hidden list item
-        if(hidden && hidden.length && list && showList) {
-            hidden.forEach((i) => {
-                data.forEach((data, index) => {
-                    if(i === data[value]) {
-                        listRef[index].current.hidden = true
-                    }
-                })  
-            })
+            // set hidden list item
+            if(hidden && hidden.length && listHandled) {
+                hidden.forEach((i) => {
+                    data.forEach((data, index) => {
+                        if(i === data[value]) {
+                            listRef[index].current.hidden = true
+                        }
+                    })  
+                })
+            }
         }
-    }, [disabled, hidden, data, list, showList, listRef, value])
+        handleDisabledAndHidden()
+    }, [disabled, hidden, data, listHandled, listRef, value])
    
     // Delay rendering the menu items until the button receives focus.
 	// The menu may have already been rendered via a programmatic open.
@@ -128,7 +134,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             buttonFocus()
             refButton.current.classList.remove(`${styles.uiCornerTop}`)
         }
-
+        //todo: handle mouseover focus
         const handleListKeyDown = (event, index) => {
             event.preventDefault()
             if(listRef[index].current && listRef[index].current.contains(event.target)) {
@@ -136,28 +142,28 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                     listRef[index].current.click()
                 }
                 if(event.code === "ArrowDown" && list) {
+                    listRef[index].current.blur()
                     if(index < list.length - 1) {
                         for(let i = index + 1; i < list.length; i +=1) {
                             const item = listRef[i].current
                             if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
                                 item.focus()
-                                listRef[index].current.blur()
                                 break
                             }
                         }
                     } else {
                         listRef[focusedItemIndex].current.focus()
-                        listRef[index].current.blur()
                     }
                 }
     
                 if(event.code === "ArrowUp" && list) {
+                    listRef[index].current.blur()
+                    document.activeElement.blur()
                     if(index >= 1 && index !== focusedItemIndex) {
                         for(let i = index -1; i >= 0; i -= 1) {
                             const item = listRef[i].current
                             if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
                                 item.focus()
-                                listRef[index].current.blur()
                                 break
                             }
                         }
@@ -166,7 +172,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                             const item = listRef[i].current
                             if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
                                 item.focus()
-                                listRef[index].current.blur()
                                 break
                             }
                         } 
@@ -195,6 +200,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 
         if(isFocus === true) {
             createList();
+            setListHandled(true)
         }
     }, [isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef])
     
@@ -218,7 +224,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             document.removeEventListener("mousedown", handleClickOutside);
           };
     }, [])
-
+    
     const handleButtonKeyDown = (e) => {
         e.preventDefault()
         if(refButton.current && refButton.current.contains(e.target)) {
@@ -226,15 +232,15 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             if(e.code === "Enter"){
                 handleShowList()  
             }
-            //todo: finish this
-            if(e.code === "ArrowDown" && list){
-                let index;
 
-                if(selectedIndex) {
-                    index = selectedIndex
-                } else {
-                    index = focusedItemIndex
-                }
+            let index;
+            if(selectedIndex) {
+                index = selectedIndex
+            } else {
+                index = focusedItemIndex
+            }
+            // show next list item text when press ArrowDown key on select Button
+            if(e.code === "ArrowDown" && list && listHandled){
                 if(index < list.length - 1) {
                     for(let i = index + 1; i < list.length; i +=1) {
                         const item = listRef[i].current
@@ -251,16 +257,36 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                     listRef[focusedItemIndex].current.click()
                 }
             }
+            // show previous list item text when press ArrowUp key on select Button
+            if(e.code === "ArrowUp" && list && listHandled) {
+                if(index >= 1 && index !== focusedItemIndex) {
+                    for(let i = index -1; i >= 0; i -= 1) {
+                        const item = listRef[i].current
+                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                            setSelectedIndex(i)
+                            setSelectText(listRef[i].current.textContent)
+                            listRef[i].current.click()
+                            break
+                        }
+                    }
+                } else {
+                    for(let i = list.length-1; i >= 0; i -= 1) {
+                        const item = listRef[i].current
+                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                            setSelectedIndex(i)
+                            setSelectText(listRef[i].current.textContent)
+                            listRef[i].current.click()
+                            break
+                        }
+                    } 
+                }
+            } 
         }     
     }
 
     // remove focus on focused list item on mouse move
-    const handleMouseMove = () => {
-        if (selectedIndex) {
-            listRef[selectedIndex].current.blur()
-        } else {
-            listRef[focusedItemIndex].current.blur()
-        }
+    const handleMouseMove = (e) => {
+        document.activeElement.blur()
     }
 
     return (
@@ -291,12 +317,11 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                 <span className={styles.selectMenuText}>{selectText? selectText : buttonText}</span>
                 <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
             </span>
-            { showList &&
             <div className={styles.dropDownMenu}>
             <ul 
             id={`${id}-menu`} 
-            style={showList? {display: "block"}: {display: "none"}} 
-            className={styles.selectMenuMenu}
+            style={showList? {height: "auto"}: {height: "0px", overflow: "hidden"}}
+            className={`${styles.selectMenuMenu} ${showList? styles.menuActive: ""}`}
             role={"listbox"}
             aria-hidden={showList ? false : true}
             aria-labelledby={`${id}-button`}
@@ -304,8 +329,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             >
                 {list}
             </ul>
-            </div>
-            }        
+            </div>      
         </div>
         </div>
         )}
