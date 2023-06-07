@@ -1,5 +1,13 @@
 import {useEffect, useState} from "react";
 
+/**
+ * @param data - array of select list texts and values
+ * @param hidden - array of hidden list items values
+ * @param disabled - array of disabled list items values
+ * @param text - string - data key of select text
+ * @param value - string - data key of select value
+ * @returns an object
+*/
 export function useSelectButtonText(data, hidden, disabled, text, value) {
     const [selectText, setSelectText] = useState("")
     const [index, setIndex] = useState(null)

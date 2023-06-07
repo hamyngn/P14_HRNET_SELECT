@@ -4,24 +4,16 @@ import {ReactComponent as SelectIcon} from '../assets/images/caret-down-solid.sv
 import PropTypes from 'prop-types';
 import {useSelectButtonText} from "../hooks/useSelectButtonText"
 
-/* if data = [
-    {
-        "name": "Alabama",
-        "abbreviation": "AL"
-    },
-    {
-        "name": "Alaska",
-        "abbreviation": "AK"
-    },
-    {
-        "name": "American Samoa",
-        "abbreviation": "AS"
-    }];
-    value = "abbreviation";
-    text = "name";
-    disabled = ["AL", "AK"] to set these items disabled;
-    hidden = ["AS"] to set this item hidden
-*/
+/**
+ * @param label - label of select button
+ * @param id - id of select element
+ * @param data - array of select list items texts and values
+ * @param hidden - array of hidden list items values
+ * @param disabled - array of disabled list items values
+ * @param text - string - data key of select text
+ * @param value - string - data key of select value
+ */
+
 const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}) => {
     // State to track if the list is showed or not
     const [showList, setShowList] = useState(false)
@@ -50,7 +42,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 
     const refButton = useRef()
     const refDropDown = useRef()
-    
+
     useEffect(() => {
         if(data && data.length) {
             const options = data.map((data, index) =>
@@ -73,7 +65,9 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         }
     }, [data])
     
-    // show and hide list
+    /**
+     * open and close list items
+     */
     const handleShowList = () => {
         refButton.current.classList.add(`${styles.uiCornerTop}`)
         setShowList(current => !current)
@@ -162,7 +156,9 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         }
     }, [isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef])
     
-    // Associate existing label with the new button
+    /**
+     * Associate existing label with the new button
+     */
     const buttonFocus = () => {
         refButton.current.focus();
         setIsFocus(true)
@@ -191,7 +187,10 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         }
     }, [selectedIndex, focusedItemIndex])
 
-    // remove focus on focused list item on mouse move
+
+    /**
+     * remove focus on focused list item on mouse move and get item index
+    */
     const handleMouseMove = (e) => {
         document.activeElement.blur()
         e.target.focus()
@@ -199,19 +198,24 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             setIndex(Array.from(e.target.parentElement.children).indexOf(e.target))
         }
     }
-
-        // todo: handle button cancel
+    /**
+     * open, close list by key press
+     * go to next or previous list item, select list item by key press
+     * show first and last list item by key press
+     * @param {*} e 
+     */
     const handleKeyDown = (e) => {
         e.preventDefault()
         let buttonFocused = refButton.current && refButton.current.contains(e.target)
-        if(buttonFocused) {
-            if(e.code === "Space") {
-                handleShowList()
-            }
+        if(e.code === "Space") {
+            handleShowList()
         }
+
         if(e.code === "Escape"){
             setShowList(false)
+            refButton.current.classList.remove(`${styles.uiCornerTop}`)
         }
+
         if(e.target.tagName === 'LI' && e.code === "Enter") {
             listRef[index].current.click()
         }
