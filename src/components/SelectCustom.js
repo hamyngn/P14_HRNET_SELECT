@@ -39,6 +39,8 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     const [listRef, setListRef] = useState([]);
     // State to track if hidden and disabled items handled
     const [listHandled, setListHandled] = useState(false)
+    // State to track list item hover index
+    const [index, setIndex] = useState(null)
 
     // text of select button
     const buttonText = useSelectButtonText(data, hidden, disabled, text, value).selectText
@@ -180,138 +182,122 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             document.removeEventListener("mousedown", handleClickOutside);
           };
     }, [])
-    
-        // todo: handle button cancel
-    const handleButtonKeyDown = (e) => {
-        e.preventDefault()
-        if(refButton.current && refButton.current.contains(e.target)) {
-            // show list items when press Enter key on select Button
-            if(e.code === "Enter"){
-                handleShowList()  
-            }
 
-            if(e.code === "Escape"){
-                setShowList(false)
-            }
+    useEffect(() => {
+        if(selectedIndex) {
+            setIndex(selectedIndex)
+        } else {
+            setIndex(focusedItemIndex)
+        }
+    }, [selectedIndex, focusedItemIndex])
 
-            let index;
-            if(selectedIndex) {
-                index = selectedIndex
-            } else {
-                index = focusedItemIndex
-            }
-            // show next list item text when press ArrowDown key on select Button
-            if(e.code === "ArrowDown" && list && listHandled){
-                if(index < list.length - 1) {
-                    for(let i = index + 1; i < list.length; i +=1) {
-                        const item = listRef[i].current
-                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
-                            setSelectedIndex(i)
-                            setSelectText(listRef[i].current.textContent)
-                            listRef[i].current.click()
-                            break
-                        }
-                    }
-                } else {
-                    setSelectedIndex(focusedItemIndex)
-                    setSelectText(listRef[focusedItemIndex].current.textContent)
-                    listRef[focusedItemIndex].current.click()
-                }
-            }
-            // show previous list item text when press ArrowUp key on select Button
-            if(e.code === "ArrowUp" && list && listHandled) {
-                if(index >= 1 && index !== focusedItemIndex) {
-                    for(let i = index -1; i >= 0; i -= 1) {
-                        const item = listRef[i].current
-                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
-                            setSelectedIndex(i)
-                            setSelectText(listRef[i].current.textContent)
-                            listRef[i].current.click()
-                            break
-                        }
-                    }
-                } else {
-                    for(let i = list.length-1; i >= 0; i -= 1) {
-                        const item = listRef[i].current
-                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
-                            setSelectedIndex(i)
-                            setSelectText(listRef[i].current.textContent)
-                            listRef[i].current.click()
-                            break
-                        }
-                    } 
-                }
-            } 
-        }     
-    }
-
-    let index;
-    if(selectedIndex) {
-        index = selectedIndex
-    } else {
-        index = focusedItemIndex
-    }
     // remove focus on focused list item on mouse move
     const handleMouseMove = (e) => {
         document.activeElement.blur()
         e.target.focus()
         if(e.target.tagName === 'LI') {
-            index = Array.from(e.target.parentElement.children).indexOf(e.target)
-            console.log(index)
+            setIndex(Array.from(e.target.parentElement.children).indexOf(e.target))
         }
     }
 
-    // handle list keyDown
-    const handleListKeyDown = (event) => { 
-        event.preventDefault()
-        buttonFocus()
-        if(index) {
-            if(event.code === "Enter") {
-                listRef[index].current.click()
+        // todo: handle button cancel
+    const handleKeyDown = (e) => {
+        e.preventDefault()
+        let buttonFocused = refButton.current && refButton.current.contains(e.target)
+        if(buttonFocused) {
+            if(e.code === "Space") {
+                handleShowList()
             }
-            if(event.code === "ArrowDown" && list && listHandled) {
-                listRef[index].current.blur()
-                if(index < list.length - 1) {
-                    for(let i = index + 1; i < list.length; i +=1) {
-                        const item = listRef[i].current
-                        index = i
-                        console.log(index)
-                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+        }
+        if(e.code === "Escape"){
+            setShowList(false)
+        }
+        if(e.target.tagName === 'LI' && e.code === "Enter") {
+            listRef[index].current.click()
+        }
+        // show next item when press ArrowDown or ArrowRight
+        if((e.code === "ArrowDown"||e.code === "ArrowRight") && list && listHandled){
+            document.activeElement.blur()
+            if(index < list.length - 1) {
+                for(let i = index + 1; i < list.length; i +=1) {
+                    const item = listRef[i].current
+                    setIndex(i)
+                    if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                        if(buttonFocused) {
+                            item.click()
+                        } else {
                             item.focus()
-                            break
                         }
+                            break
+                        }   
                     }
+            } else {
+                setIndex(focusedItemIndex)
+                if(buttonFocused) {
+                    listRef[focusedItemIndex].current.click()
                 } else {
                     listRef[focusedItemIndex].current.focus()
-                    index = focusedItemIndex
                 }
             }
-
-            if(event.code === "ArrowUp" && list && listHandled) {
-                listRef[index].current.blur()
-                document.activeElement.blur()
-                if(index >= 1 && index !== focusedItemIndex) {
-                    for(let i = index -1; i >= 0; i -= 1) {
-                        const item = listRef[i].current
-                        index = i
-                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+        }
+        // show previous item when press ArrowUp or ArrowLeft
+        if((e.code === "ArrowUp"||e.code === "ArrowLeft") && list && listHandled) {
+            document.activeElement.blur()
+            if(index >= 1 && index !== focusedItemIndex) {
+                for(let i = index -1; i >= 0; i -= 1) {
+                    const item = listRef[i].current
+                    setIndex(i)
+                    if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                        if(buttonFocused) {
+                            item.click()
+                        } else {
                             item.focus()
-                            break
                         }
+                        break
                     }
-                } else {
-                    for(let i = list.length-1; i >= 0; i -= 1) {
-                        const item = listRef[i].current
-                        index = i
-                        if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                }
+            } else {
+                for(let i = list.length-1; i >= 0; i -= 1) {
+                    const item = listRef[i].current
+                    setIndex(i)
+                    if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                        if(buttonFocused) {
+                            item.click()
+                        } else {
                             item.focus()
-                            break
-                        }
-                    } 
+                        }  
+                        break
+                    }
+                } 
+            }
+        }  
+        // show first list item text when press PageUp
+        if((e.code === "PageUp") && list && listHandled) {
+            document.activeElement.blur()
+            setIndex(focusedItemIndex)
+            if(buttonFocused) {
+                listRef[focusedItemIndex].current.click()
+            } else {
+                listRef[focusedItemIndex].current.focus()
+            }
+        }
+
+        // show last list item text when press PageDown
+        if(e.code === "PageDown" && list && listHandled) {
+            document.activeElement.blur()
+            for(let i = list.length-1; i >= 0; i -= 1) {
+                const item = listRef[i].current
+                setIndex(i)
+                if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                    if(buttonFocused) {
+                        item.click()
+                    } else {
+                        item.focus()
+                    }  
+                    break
                 }
             } 
         }
-        
     }
 
     return (
@@ -326,12 +312,11 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         <select name={id} id={id} style={{display:"none"}}>
             {options}
         </select>
-        <div className={styles.list} ref={refDropDown}>
+        <div className={styles.list} ref={refDropDown} onKeyDown={(e) => handleKeyDown(e)} >
             <span 
             id={`${id}-button`} 
             className={styles.selectMenuButton} 
             onClick={() => handleShowList()}
-            onKeyDown={(e) => handleButtonKeyDown(e)} 
             ref={refButton}
             tabIndex={0}
             role={"combobox"}
@@ -339,7 +324,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             aria-controls={`${id}-menu`}
 			aria-haspopup = "true"
             >
-                <span className={styles.selectMenuText}>{selectText? selectText : buttonText}</span>
+                <span className={styles.selectMenuText}>{selectText && isFocus? selectText : buttonText}</span>
                 <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
             </span>
             <div className={styles.dropDownMenu}>
@@ -352,7 +337,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             aria-labelledby={`${id}-button`}
             onMouseMove={handleMouseMove}
             tabIndex={0}
-            onKeyDown={(e) => handleListKeyDown(e)}
             >
                 {list}
             </ul>
