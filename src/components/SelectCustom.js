@@ -121,6 +121,11 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     // Delay rendering the menu items until the button receives focus.
 	// The menu may have already been rendered via a programmatic open.
     useEffect(() => {
+        // handle onChange value when no item selected
+        if(onChange && focusedItemIndex && !selectedIndex) {
+            onChange(data[focusedItemIndex][value])
+        }
+
         // handle list selected
         const handleClick = (value, text, index) => {
             if(onChange) {
