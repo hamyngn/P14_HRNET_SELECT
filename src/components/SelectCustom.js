@@ -122,7 +122,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 	// The menu may have already been rendered via a programmatic open.
     useEffect(() => {
         // handle onChange value when no item selected
-        if(onChange && focusedItemIndex && !selectedIndex) {
+        if(onChange && !selectedIndex && (focusedItemIndex || focusedItemIndex === 0)) {
             onChange(data[focusedItemIndex][value])
         }
 
