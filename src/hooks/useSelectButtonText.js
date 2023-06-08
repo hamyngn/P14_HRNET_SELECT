@@ -16,7 +16,7 @@ export function useSelectButtonText(data, hidden, disabled, text, value) {
     //when there is no disabled or hidden item
     if(!hidden && !disabled) {
         setSelectText(data[0][text])
-        console.log("no hide no dis")
+        setIndex(0)
     }
 
     //when there is hidden item and no disabled item
