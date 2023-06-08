@@ -223,10 +223,12 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         if((e.code === "ArrowDown"||e.code === "ArrowRight") && list && listHandled){
             document.activeElement.blur()
             if(index < list.length - 1) {
+                let available
                 for(let i = index + 1; i < list.length; i +=1) {
                     const item = listRef[i].current
-                    setIndex(i)
                     if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                        available = true
+                        setIndex(i)
                         if(buttonFocused) {
                             item.click()
                         } else {
@@ -235,23 +237,19 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                             break
                         }   
                     }
-            } else {
-                setIndex(focusedItemIndex)
-                if(buttonFocused) {
-                    listRef[focusedItemIndex].current.click()
-                } else {
-                    listRef[focusedItemIndex].current.focus()
+                if(!available) {
+                    e.target.focus()
                 }
             }
         }
         // show previous item when press ArrowUp or ArrowLeft
         if((e.code === "ArrowUp"||e.code === "ArrowLeft") && list && listHandled) {
             document.activeElement.blur()
-            if(index >= 1 && index !== focusedItemIndex) {
+            if(index > focusedItemIndex) {
                 for(let i = index -1; i >= 0; i -= 1) {
                     const item = listRef[i].current
-                    setIndex(i)
                     if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
+                        setIndex(i)
                         if(buttonFocused) {
                             item.click()
                         } else {
@@ -261,18 +259,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                     }
                 }
             } else {
-                for(let i = list.length-1; i >= 0; i -= 1) {
-                    const item = listRef[i].current
-                    setIndex(i)
-                    if(!item.classList.contains(`${styles.disabled}`) && !item.hidden) {
-                        if(buttonFocused) {
-                            item.click()
-                        } else {
-                            item.focus()
-                        }  
-                        break
-                    }
-                } 
+                e.target.focus()
             }
         }  
         // show first list item text when press PageUp
