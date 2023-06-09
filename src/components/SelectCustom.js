@@ -33,13 +33,10 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     const [listHandled, setListHandled] = useState(false)
     // State to track list item hover index
     const [index, setIndex] = useState(null)
-
     // text of select button
     const buttonText = useSelectButtonText(data, hidden, disabled, text, value).selectText
-
     // index of focused list item
     const focusedItemIndex = useSelectButtonText(data, hidden, disabled, text, value).index
-
     const refButton = useRef()
     const refDropDown = useRef()
 
@@ -79,7 +76,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 
     useEffect(() => {  
         // set focus to first list item if there is no selected item
-        if(list && listHandled && showList && focusedItemIndex && selectedIndex === null) {
+        if(list && listHandled && showList && selectedIndex === null && (focusedItemIndex || focusedItemIndex === 0)) {
             refButton.current.blur()
             listRef[focusedItemIndex].current.focus()
         }
@@ -89,7 +86,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             refButton.current.blur()
             listRef[selectedIndex].current.focus()
         } 
-    }, [list, showList, selectedIndex, listRef, focusedItemIndex])
+    }, [list, showList, selectedIndex, listRef, focusedItemIndex, listHandled])
 
     useEffect(() => {
         const handleDisabledAndHidden = () => {
@@ -103,7 +100,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                     })  
                 })
             }
-
             // set hidden list item
             if(hidden && hidden.length && list && listHandled) {
                 hidden.forEach((i) => {
@@ -125,7 +121,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         if(onChange && !selectedIndex && (focusedItemIndex || focusedItemIndex === 0)) {
             onChange(data[focusedItemIndex][value])
         }
-
         // handle list selected
         const handleClick = (value, text, index) => {
             if(onChange) {
@@ -137,7 +132,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             buttonFocus()
             refButton.current.classList.remove(`${styles.uiCornerTop}`)
         }
-
         // create list of options
         const createList = () => {
             const lists = data.map((data, index) =>
@@ -154,7 +148,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
             )
             setList(lists)
         }
-
         if(isFocus === true) {
             createList();
             setListHandled(true)
@@ -192,7 +185,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         }
     }, [selectedIndex, focusedItemIndex])
 
-
     /**
      * remove focus on focused list item on mouse move and get item index
     */
@@ -215,19 +207,17 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         if(e.code === "Space") {
             handleShowList()
         }
-
         if(e.code === "Escape"){
             setShowList(false)
             refButton.current.classList.remove(`${styles.uiCornerTop}`)
         }
-
         if(e.target.tagName === 'LI' && e.code === "Enter") {
             listRef[index].current.click()
         }
         // show next item when press ArrowDown or ArrowRight
         if((e.code === "ArrowDown"||e.code === "ArrowRight") && list && listHandled){
             document.activeElement.blur()
-            if(index < list.length - 1) {
+            if(index <= list.length - 1) {
                 let available
                 for(let i = index + 1; i < list.length; i +=1) {
                     const item = listRef[i].current
@@ -277,7 +267,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
                 listRef[focusedItemIndex].current.focus()
             }
         }
-
         // show last list item text when press PageDown
         if(e.code === "PageDown" && list && listHandled) {
             document.activeElement.blur()
@@ -298,9 +287,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 
     return (
         <>
-        {!data.length ? (
-        <div>No data</div>
-        ) : (
         <div className={styles.container}>
         { label && (
         <label htmlFor={`${id}-button`} onClick={() => buttonFocus()}>{label}</label> 
@@ -308,38 +294,37 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         <select name={id} id={id} style={{display:"none"}}>
             {options}
         </select>
-        <div className={styles.list} ref={refDropDown} onKeyDown={(e) => handleKeyDown(e)} >
-            <span 
-            id={`${id}-button`} 
-            className={styles.selectMenuButton} 
-            onClick={() => handleShowList()}
-            ref={refButton}
-            tabIndex={0}
-            role={"combobox"}
-            aria-expanded = {showList ? true : false}
-            aria-controls={`${id}-menu`}
-			aria-haspopup = "true"
-            >
-                <span className={styles.selectMenuText}>{selectText ? selectText : buttonText}</span>
-                <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
-            </span>
-            <div className={styles.dropDownMenu}>
-            <ul 
-            id={`${id}-menu`} 
-            style={showList? {height: "auto"}: {height: "0px", overflow: "hidden"}}
-            className={`${styles.selectMenuMenu} ${showList? styles.menuActive: ""}`}
-            role={"listbox"}
-            aria-hidden={showList ? false : true}
-            aria-labelledby={`${id}-button`}
-            onMouseMove={handleMouseMove}
-            tabIndex={0}
-            >
-                {list}
-            </ul>
-            </div>      
+        <span 
+        id={`${id}-button`} 
+        className={styles.selectMenuButton} 
+        onClick={() => handleShowList()}
+        ref={refButton}
+        tabIndex={0}
+        role={"combobox"}
+        aria-label={`${id}-button`}
+        aria-expanded = {showList ? true : false}
+        aria-controls={`${id}-menu`}
+        aria-haspopup = "true"
+        onKeyDown={(e) => handleKeyDown(e)}
+        >
+        <span className={styles.selectMenuText}>{selectText ? selectText : buttonText}</span>
+        <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
+        </span>
+        <div className={styles.dropDownMenu} ref={refDropDown} onKeyDown={(e) => handleKeyDown(e)}>
+        <ul 
+        id={`${id}-menu`} 
+        style={showList? {height: "auto"}: {height: "0px", overflow: "hidden"}}
+        className={`${styles.selectMenuMenu} ${showList? styles.menuActive: ""}`}
+        role={"listbox"}
+        aria-hidden={showList ? false : true}
+        aria-labelledby={`${id}-button`}
+        onMouseMove={handleMouseMove}
+        tabIndex={showList? 0 : -1}
+        >
+            {list}
+        </ul>
+        </div>      
         </div>
-        </div>
-        )}
         </>
     )
 }
