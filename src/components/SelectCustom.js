@@ -79,7 +79,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
 
     useEffect(() => {  
         // set focus to first list item if there is no selected item
-        if(list && showList && focusedItemIndex && selectedIndex === null) {
+        if(list && listHandled && showList && focusedItemIndex && selectedIndex === null) {
             refButton.current.blur()
             listRef[focusedItemIndex].current.focus()
         }
