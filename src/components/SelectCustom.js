@@ -5,16 +5,17 @@ import PropTypes from 'prop-types';
 import {useSelectButtonText} from "../hooks/useSelectButtonText"
 
 /**
- * @param label - label of select button
+ * @param label - string - label of select button
  * @param id - id of select element
  * @param data - array of select list items texts and values
- * @param hidden - array of hidden list items values
- * @param disabled - array of disabled list items values
+ * @param hidden - array of hidden list items values ex:["AL","CA"]
+ * @param disabled - array of disabled list items values ex:["AL","CA"]
  * @param text - string - data key of select text
  * @param value - string - data key of select value
+ * @param buttonDisabled - bool - if the select button is disabled
  */
 
-const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}) => {
+const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden, buttonDisabled}) => {
     // State to track if the list is showed or not
     const [showList, setShowList] = useState(false)
     // State to track the selected option text
@@ -158,8 +159,10 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
      * Associate existing label with the new button
      */
     const buttonFocus = () => {
-        refButton.current.focus();
-        setIsFocus(true)
+        if(!buttonDisabled) {
+            refButton.current.focus();
+            setIsFocus(true)
+        }
     }
     
     // Close menu if click outside of menu
@@ -178,12 +181,14 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
     }, [])
 
     useEffect(() => {
-        if(selectedIndex) {
-            setIndex(selectedIndex)
-        } else {
-            setIndex(focusedItemIndex)
+        if(showList) {
+            if(selectedIndex) {
+                setIndex(selectedIndex)
+            } else {
+                setIndex(focusedItemIndex)
+            }
         }
-    }, [selectedIndex, focusedItemIndex])
+    }, [selectedIndex, focusedItemIndex, showList])
 
     /**
      * remove focus on focused list item on mouse move and get item index
@@ -207,9 +212,18 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         if(e.code === "Space") {
             handleShowList()
         }
+        if(e.code === "Tab") {
+            refButton.current.parentElement.nextSibling.focus()
+            if(showList){
+                setShowList(false)
+                refButton.current.classList.remove(`${styles.uiCornerTop}`)
+            }
+        }
         if(e.code === "Escape"){
-            setShowList(false)
-            refButton.current.classList.remove(`${styles.uiCornerTop}`)
+            if(showList){
+                setShowList(false)
+                refButton.current.classList.remove(`${styles.uiCornerTop}`)
+            }
         }
         if(e.target.tagName === 'LI' && e.code === "Enter") {
             listRef[index].current.click()
@@ -296,10 +310,10 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden}
         </select>
         <span 
         id={`${id}-button`} 
-        className={styles.selectMenuButton} 
+        className={`${styles.selectMenuButton} ${buttonDisabled? styles.disabled: ""}`} 
         onClick={() => handleShowList()}
         ref={refButton}
-        tabIndex={0}
+        tabIndex={buttonDisabled ? -1 : 0}
         role={"combobox"}
         aria-label={`${id}-button`}
         aria-expanded = {showList ? true : false}
@@ -337,7 +351,8 @@ SelectCustom.propTypes = {
     text: PropTypes.string,
     onChange: PropTypes.func,
     disabled: PropTypes.arrayOf(PropTypes.string),
-    hidden:  PropTypes.arrayOf(PropTypes.string)
+    hidden:  PropTypes.arrayOf(PropTypes.string),
+    buttonDisabled: PropTypes.bool
 }
 
 export default SelectCustom;
