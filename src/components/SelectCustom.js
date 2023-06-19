@@ -320,6 +320,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
         aria-controls={`${id}-menu`}
         aria-haspopup = "true"
         onKeyDown={(e) => handleKeyDown(e)}
+        onFocus={()=> setIsFocus(true)}
         >
         <span className={styles.selectMenuText}>{selectText ? selectText : buttonText}</span>
         <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
