@@ -1,4 +1,4 @@
-.container {
+.selectContainer {
     position: relative;
     height: 90px;
     width: 430px;
@@ -66,7 +66,7 @@
     border-bottom-left-radius: 3px;
     background-color: #ffffff;
 }
-ul {
+.selectContainer ul {
     list-style-type: none;
     margin: 0;
 }
@@ -74,10 +74,10 @@ ul {
     border: 1px solid #c5c5c5;
     padding: 10px;
 }
-ul li:hover {
+.selectContainer ul li:hover {
     cursor: pointer;
 }
-li:focus {
+.selectContainer li:focus {
     background-color: #007fff;
 }
 .selectMenuIcon, .selectIcon {
@@ -89,7 +89,7 @@ li:focus {
     background-color: #c5c5c5;
 }
 @media (max-width: 575px) {
-    .container {
+    .selectContainer {
         width: 96%;
     }
     .selectMenuButton {
