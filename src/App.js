@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 function App() {
   const [state, setState] = useState("")
   useEffect(() => {
-    console.log(state)
   }, [state])
   return (
     <div>

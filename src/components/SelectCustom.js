@@ -1,8 +1,13 @@
-import React, {useState, useRef, useEffect, createRef} from "react";
+import React, {useState, useRef, useEffect} from "react";
 import styles from '../assets/styles/SelectCustom.module.css'
 import {ReactComponent as SelectIcon} from '../assets/images/caret-down-solid.svg';
 import PropTypes from 'prop-types';
 import {useSelectButtonText} from "../hooks/useSelectButtonText"
+import { useHandleDisabledAndHidden } from "../hooks/useHandleDisabledAndHidden";
+import { useFocus } from "../hooks/useFocus";
+import { useClickOutsideOfComponent } from "../hooks/useClickOutsideOfComponent";
+import { useCreateList } from "../hooks/useCreateList";
+import { useCreateRefs } from "../hooks/useCreateRefs";
 
 /**
  * @param label - string - label of select button
@@ -52,16 +57,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
         }
     }, [data, text, value])
 
-    // create list items refs
-    useEffect(() => {
-        const elRefs = []
-        if(data && data.length){
-            for(let i = 0; i < data.length; i += 1) {
-                elRefs.push(elRefs[i] = createRef())
-            }
-            setListRef(elRefs)
-        }
-    }, [data])
+    useCreateRefs(data, setListRef)
     
     /**
      * open and close list items
@@ -74,87 +70,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             refButton.current.classList.remove(`${styles.uiCornerTop}`) 
         }
     }
-
-    useEffect(() => {  
-        // set focus to first list item if there is no selected item
-        if(list && listHandled && showList && selectedIndex === null && (focusedItemIndex || focusedItemIndex === 0)) {
-            refButton.current.blur()
-            listRef[focusedItemIndex].current.focus()
-        }
-
-        // if there is selected item and menu is opened, set focus on selected list item
-        if(showList && selectedIndex) {
-            refButton.current.blur()
-            listRef[selectedIndex].current.focus()
-        } 
-    }, [list, showList, selectedIndex, listRef, focusedItemIndex, listHandled])
-
-    useEffect(() => {
-        const handleDisabledAndHidden = () => {
-            // set disabled list item
-            if(disabled && disabled.length && list && listHandled) {
-                disabled.forEach((i) => {
-                    data.forEach((data, index) => {
-                        if(i === data[value]) {
-                            listRef[index].current.classList.add(`${styles.disabled}`)
-                        }
-                    })  
-                })
-            }
-            // set hidden list item
-            if(hidden && hidden.length && list && listHandled) {
-                hidden.forEach((i) => {
-                    data.forEach((data, index) => {
-                        if(i === data[value]) {
-                            listRef[index].current.hidden = true
-                        }
-                    })  
-                })
-            }
-        }
-        handleDisabledAndHidden()
-    }, [disabled, hidden, data, listHandled, list, listRef, value])
-   
-    // Delay rendering the menu items until the button receives focus.
-	// The menu may have already been rendered via a programmatic open.
-    useEffect(() => {
-        // handle onChange value when no item selected
-        if(onChange && !selectedIndex && (focusedItemIndex || focusedItemIndex === 0)) {
-            onChange(data[focusedItemIndex][value])
-        }
-        // handle list selected
-        const handleClick = (value, text, index) => {
-            if(onChange) {
-                onChange(value)
-            }
-            setSelectText(text)
-            setShowList(false)
-            setSelectedIndex(index)
-            buttonFocus()
-            refButton.current.classList.remove(`${styles.uiCornerTop}`)
-        }
-        // create list of options
-        const createList = () => {
-            const lists = data.map((data, index) =>
-            <li 
-                key={`${id}-menu-item-${index}`}
-                tabIndex={-1}
-                role={"option"}
-                aria-selected = {index === selectedIndex ? true : false}
-                ref={listRef[index]}
-                onClick={() => handleClick(data[value], data[text], index)}
-            >
-                {data[text]}
-            </li>
-            )
-            setList(lists)
-        }
-        if(isFocus === true) {
-            createList();
-            setListHandled(true)
-        }
-    }, [isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef])
-    
+        
     /**
      * Associate existing label with the new button
      */
@@ -164,21 +80,14 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             setIsFocus(true)
         }
     }
+
+    useFocus(list, listHandled, showList, selectedIndex, focusedItemIndex, refButton, listRef)
+
+    useHandleDisabledAndHidden(disabled, hidden, data, listHandled, list, listRef, value, styles)
+   
+    useCreateList(isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef, refButton, buttonFocus, styles, setShowList, setSelectText, setSelectedIndex, setList, setListHandled)
     
-    // Close menu if click outside of menu
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if(refDropDown.current && !refDropDown.current.contains(event.target)) {
-                setShowList(false)
-                refButton.current.classList.remove(`${styles.uiCornerTop}`) 
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            // Unbind the event listener on clean up
-            document.removeEventListener("mousedown", handleClickOutside);
-          };
-    }, [])
+    useClickOutsideOfComponent(refDropDown, refButton, setShowList, styles)
 
     useEffect(() => {
         if(showList) {
@@ -200,6 +109,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             setIndex(Array.from(e.target.parentElement.children).indexOf(e.target))
         }
     }
+
     /**
      * open, close list by key press
      * go to next or previous list item, select list item by key press
@@ -298,50 +208,50 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             } 
         }
     }
-
+    
     return (
-        <>
-        <div className={styles.selectContainer}>
-        { label && (
-        <label htmlFor={`${id}-button`} onClick={() => buttonFocus()}>{label}</label> 
-        )}
-        <select name={id} id={id} style={{display:"none"}}>
-            {options}
-        </select>
-        <span 
-        id={`${id}-button`} 
-        className={`${styles.selectMenuButton} ${buttonDisabled? styles.disabled: ""}`} 
-        onClick={() => handleShowList()}
-        ref={refButton}
-        tabIndex={buttonDisabled ? -1 : 0}
-        role={"combobox"}
-        aria-label={`${id}-button`}
-        aria-expanded = {showList ? true : false}
-        aria-controls={`${id}-menu`}
-        aria-haspopup = "true"
-        onKeyDown={(e) => handleKeyDown(e)}
-        onFocus={()=> setIsFocus(true)}
-        >
-        <span className={styles.selectMenuText}>{selectText ? selectText : buttonText}</span>
-        <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
-        </span>
-        <div className={styles.dropDownMenu} ref={refDropDown} onKeyDown={(e) => handleKeyDown(e)}>
-        <ul 
-        id={`${id}-menu`} 
-        style={showList? {height: "auto"}: {height: "0px", overflow: "hidden"}}
-        className={`${styles.selectMenuMenu} ${showList? styles.menuActive: ""}`}
-        role={"listbox"}
-        aria-hidden={showList ? false : true}
-        aria-labelledby={`${id}-button`}
-        onMouseMove={handleMouseMove}
-        tabIndex={showList? 0 : -1}
-        >
-            {list}
-        </ul>
-        </div>      
-        </div>
-        </>
-    )
+    <>
+    <div className={styles.selectContainer}>
+    { label && (
+    <label htmlFor={`${id}-button`} onClick={() => buttonFocus()}>{label}</label> 
+    )}
+    <select name={id} id={id} style={{display:"none"}}>
+        {options}
+    </select>
+    <span 
+    id={`${id}-button`} 
+    className={`${styles.selectMenuButton} ${buttonDisabled? styles.disabled: ""}`} 
+    onClick={() => handleShowList()}
+    ref={refButton}
+    tabIndex={buttonDisabled ? -1 : 0}
+    role={"combobox"}
+    aria-label={`${id}-button`}
+    aria-expanded = {showList ? true : false}
+    aria-controls={`${id}-menu`}
+    aria-haspopup = "true"
+    onKeyDown={(e) => handleKeyDown(e)}
+    onFocus={()=> setIsFocus(true)}
+    >
+    <span className={styles.selectMenuText}>{selectText ? selectText : buttonText}</span>
+    <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
+    </span>
+    <div className={styles.dropDownMenu} ref={refDropDown} onKeyDown={(e) => handleKeyDown(e)}>
+    <ul 
+    id={`${id}-menu`} 
+    style={showList? {height: "auto"}: {height: "0px", overflow: "hidden"}}
+    className={`${styles.selectMenuMenu} ${showList? styles.menuActive: ""}`}
+    role={"listbox"}
+    aria-hidden={showList ? false : true}
+    aria-labelledby={`${id}-button`}
+    onMouseMove={handleMouseMove}
+    tabIndex={showList? 0 : -1}
+    >
+        {list}
+    </ul>
+    </div>      
+    </div>
+    </>
+)
 }
 
 SelectCustom.propTypes = {
