@@ -36,7 +36,7 @@
     ]
   },
   "description": "Clone the following repository on your computer https://github.com/hamyngn/P14_HRNET_SELECT.git",
-  "main": "./build/index.js",
+  "main": "index.js",
   "devDependencies": {},
   "repository": {
     "type": "git",
