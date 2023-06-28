@@ -1,6 +1,6 @@
 {
   "name": "oc-select-component",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "private": false,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
@@ -34,19 +34,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "description": "Clone the following repository on your computer https://github.com/hamyngn/P14_HRNET_SELECT.git",
-  "main": "index.js",
-  "devDependencies": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hamyngn/P14_HRNET_SELECT.git"
-  },
-  "keywords": [],
-  "author": "hamyngn",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/hamyngn/P14_HRNET_SELECT/issues"
-  },
-  "homepage": "https://github.com/hamyngn/P14_HRNET_SELECT#readme"
+  }
 }
