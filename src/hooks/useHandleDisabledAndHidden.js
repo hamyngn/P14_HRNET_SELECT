@@ -5,20 +5,19 @@ import { useEffect } from "react"
  * @param {Array} disabled 
  * @param {Array} hidden 
  * @param {Array} data 
- * @param {boolean} listHandled 
  * @param {Array} list 
  * @param {Array} listRef 
  * @param {String} value 
  * @param {*} styles 
  */
-export function useHandleDisabledAndHidden(disabled, hidden, data, listHandled, list, listRef, value, styles) {
+export function useHandleDisabledAndHidden(disabled, hidden, data, list, listRef, value, styles) {
     useEffect(() => {
         const handleDisabledAndHidden = () => {
             // set disabled list item
             if(disabled && disabled.length && list && listRef) {
                 disabled.forEach((i) => {
                     data.forEach((data, index) => {
-                        if(i === data[value]) {
+                        if(i === data[value] && listRef[index].current) {
                             listRef[index].current.classList.add(`${styles.disabled}`)
                         }
                     })  
@@ -28,7 +27,7 @@ export function useHandleDisabledAndHidden(disabled, hidden, data, listHandled, 
             if(hidden && hidden.length && list && listRef) {
                 hidden.forEach((i) => {
                     data.forEach((data, index) => {
-                        if(i === data[value]) {
+                        if(i === data[value] && listRef[index].current) {
                             listRef[index].current.hidden = true
                         }
                     })  
@@ -36,5 +35,5 @@ export function useHandleDisabledAndHidden(disabled, hidden, data, listHandled, 
             }
         }
         handleDisabledAndHidden()
-    }, [disabled, hidden, data, listHandled, list, listRef, value, styles.disabled])
+    }, [disabled, hidden, data, list, listRef, value, styles.disabled])
 }

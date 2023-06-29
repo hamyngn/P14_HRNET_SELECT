@@ -8,7 +8,7 @@ function App() {
   }, [state])
   return (
     <div>
-      <SelectCustom id="state" label="State" disabled={["CA", "AZ"]} hidden={["AL", "CT", "WY"]} data={states} value="abbreviation" text="name" onChange={(value) => setState(value)}/>
+      <SelectCustom id="state" label="State" disabled={["AZ"]} hidden={["CA"]} data={states} value="abbreviation" text="name" onChange={(value) => setState(value)} width="400px"/>
     </div>
   );
 }

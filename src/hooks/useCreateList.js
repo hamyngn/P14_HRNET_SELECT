@@ -19,9 +19,8 @@ import { useEffect } from "react"
  * @param {string} setSelectText 
  * @param {number} setSelectedIndex 
  * @param {Array} setList 
- * @param {boolean} setListHandled 
  */
-export function useCreateList(isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef, refButton, buttonFocus, styles, setShowList, setSelectText, setSelectedIndex, setList, setListHandled) {
+export function useCreateList(isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef, refButton, buttonFocus, styles, setShowList, setSelectText, setSelectedIndex, setList) {
         // Delay rendering the menu items until the button receives focus.
 	// The menu may have already been rendered via a programmatic open.
     useEffect(() => {
@@ -58,7 +57,6 @@ export function useCreateList(isFocus, data, id, value, text, selectedIndex, onC
         }
         if(isFocus === true) {
             createList();
-            setListHandled(true)
         }
-    }, [isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef, refButton, styles, setShowList, setSelectText, setSelectedIndex, setList, setListHandled])
+    }, [isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef, refButton, styles, setShowList, setSelectText, setSelectedIndex, setList])
 }

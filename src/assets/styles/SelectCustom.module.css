@@ -90,7 +90,7 @@
 }
 @media (max-width: 575px) {
     .selectContainer {
-        width: 96%;
+        width: 100%;
     }
     .selectMenuButton {
         padding: 10px;

@@ -8,6 +8,7 @@ import { useFocus } from "../hooks/useFocus";
 import { useClickOutsideOfComponent } from "../hooks/useClickOutsideOfComponent";
 import { useCreateList } from "../hooks/useCreateList";
 import { useCreateRefs } from "../hooks/useCreateRefs";
+import { useCreateOptions } from "../hooks/useCreateOptions";
 
 /**
  * @param label - string - label of select button
@@ -20,7 +21,7 @@ import { useCreateRefs } from "../hooks/useCreateRefs";
  * @param buttonDisabled - bool - if the select button is disabled
  */
 
-const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden, buttonDisabled}) => {
+const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden, buttonDisabled, width}) => {
     // State to track if the list is showed or not
     const [showList, setShowList] = useState(false)
     // State to track the selected option text
@@ -35,8 +36,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     const [selectedIndex, setSelectedIndex] = useState(null)
     // State to track listRefs
     const [listRef, setListRef] = useState([]);
-    // State to track if hidden and disabled items handled
-    const [listHandled, setListHandled] = useState(false)
     // State to track list item hover index
     const [index, setIndex] = useState(null)
     // text of select button
@@ -46,16 +45,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     const refButton = useRef()
     const refDropDown = useRef()
 
-    useEffect(() => {
-        if(data && data.length) {
-            const options = data.map((data, index) =>
-            <option value={data[value]} key={index}>{data[text]}</option>
-            )
-            setOptions(options)
-        } else {
-            return;
-        }
-    }, [data, text, value])
+    useCreateOptions(data, setOptions, text, value)
 
     useCreateRefs(data, setListRef)
     
@@ -81,11 +71,11 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
         }
     }
 
-    useFocus(list, listHandled, showList, selectedIndex, focusedItemIndex, refButton, listRef)
+    useFocus(list, showList, selectedIndex, focusedItemIndex, refButton, listRef)
 
-    useHandleDisabledAndHidden(disabled, hidden, data, listHandled, list, listRef, value, styles)
+    useHandleDisabledAndHidden(disabled, hidden, data, list, listRef, value, styles)
    
-    useCreateList(isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef, refButton, buttonFocus, styles, setShowList, setSelectText, setSelectedIndex, setList, setListHandled)
+    useCreateList(isFocus, data, id, value, text, selectedIndex, onChange, showList, focusedItemIndex, listRef, refButton, buttonFocus, styles, setShowList, setSelectText, setSelectedIndex, setList)
     
     useClickOutsideOfComponent(refDropDown, refButton, setShowList, styles)
 
@@ -139,7 +129,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             listRef[index].current.click()
         }
         // show next item when press ArrowDown or ArrowRight
-        if((e.code === "ArrowDown"||e.code === "ArrowRight") && list && listHandled){
+        if((e.code === "ArrowDown"||e.code === "ArrowRight") && list){
             document.activeElement.blur()
             if(index <= list.length - 1) {
                 let available
@@ -162,7 +152,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             }
         }
         // show previous item when press ArrowUp or ArrowLeft
-        if((e.code === "ArrowUp"||e.code === "ArrowLeft") && list && listHandled) {
+        if((e.code === "ArrowUp"||e.code === "ArrowLeft") && list) {
             document.activeElement.blur()
             if(index > focusedItemIndex) {
                 for(let i = index -1; i >= 0; i -= 1) {
@@ -182,7 +172,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             }
         }  
         // show first list item text when press PageUp
-        if((e.code === "PageUp") && list && listHandled) {
+        if((e.code === "PageUp") && list) {
             document.activeElement.blur()
             setIndex(focusedItemIndex)
             if(buttonFocused) {
@@ -192,7 +182,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
             }
         }
         // show last list item text when press PageDown
-        if(e.code === "PageDown" && list && listHandled) {
+        if(e.code === "PageDown" && list) {
             document.activeElement.blur()
             for(let i = list.length-1; i >= 0; i -= 1) {
                 const item = listRef[i].current
@@ -211,7 +201,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     
     return (
     <>
-    <div className={styles.selectContainer}>
+    <div className={styles.selectContainer} style={width && {width: `${width}`}}>
     { label && (
     <label htmlFor={`${id}-button`} onClick={() => buttonFocus()}>{label}</label> 
     )}
