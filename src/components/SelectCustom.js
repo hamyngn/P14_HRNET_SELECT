@@ -200,7 +200,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     }
     
     return (
-    <>
     <div className={styles.selectContainer} style={width && {width: `${width}`}}>
     { label && (
     <label htmlFor={`${id}-button`} onClick={() => buttonFocus()}>{label}</label> 
@@ -240,7 +239,6 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     </ul>
     </div>      
     </div>
-    </>
 )
 }
 
