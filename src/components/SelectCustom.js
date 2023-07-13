@@ -251,7 +251,8 @@ SelectCustom.propTypes = {
     onChange: PropTypes.func,
     disabled: PropTypes.arrayOf(PropTypes.string),
     hidden:  PropTypes.arrayOf(PropTypes.string),
-    buttonDisabled: PropTypes.bool
+    buttonDisabled: PropTypes.bool,
+    width: PropTypes.string
 }
 
 export default SelectCustom;
