@@ -2,6 +2,7 @@
   "name": "oc-select-component",
   "version": "0.1.5",
   "private": false,
+  "main": "./src/index.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
