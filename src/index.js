@@ -1,3 +1,3 @@
-import SelectCustom from "./components/SelectCustom"
+const SelectCustom = require('./components/SelectCustom')
 
 module.exports = {SelectCustom}
