@@ -1,0 +1,98 @@
+.selectContainer {
+    position: relative;
+    height: 90px;
+    width: 430px;
+}
+.selectMenuButton {
+    display: flex;
+    font-family: Arial,Helvetica,sans-serif;
+    background-color: #f6f6f6;
+    font-size: 1em;
+    font-weight: normal;
+    border-radius: 3px;
+    color: #454545;
+    border: 1px solid #c5c5c5;
+    line-height: normal;
+    margin-right: 0.1em;
+    cursor: pointer;
+    vertical-align: middle;
+    overflow: visible;
+    text-align: left;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16.5px 14px;
+}
+.selectMenuButton:active {
+    border: 1px solid #003eff;
+    background: #007fff;
+    font-weight: normal;
+    color: #ffffff;
+}
+.selectMenuButton:hover, .selectMenuButton:focus {
+    background-color: #dcdcdc9f;
+}
+.selectMenuButton:focus {
+    border: 1px solid black
+}
+.selectMenuText {
+    display: block;
+    margin-right: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.uiCornerTop {
+    border-radius: 0;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+}
+.list {
+    position: absolute;
+    top: 35px; 
+    left: 0px;
+    background-color: #ffffff;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+.dropDownMenu {
+    position: absolute;
+    width: 100%;
+    z-index: 100;
+}
+.selectMenuMenu { 
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    background-color: #ffffff;
+}
+.selectContainer ul {
+    list-style-type: none;
+    margin: 0;
+}
+.menuActive {
+    border: 1px solid #c5c5c5;
+    padding: 10px;
+}
+.selectContainer ul li:hover {
+    cursor: pointer;
+}
+.selectContainer li:focus {
+    background-color: #007fff;
+}
+.selectMenuIcon, .selectIcon {
+    width: 16px;
+    height: 16px;
+}
+.disabled {
+    pointer-events: none;
+    background-color: #c5c5c5;
+}
+@media (max-width: 575px) {
+    .selectContainer {
+        width: 100%;
+    }
+    .selectMenuButton {
+        padding: 10px;
+    }
+}
