@@ -2,7 +2,7 @@
   "name": "oc-select-component",
   "version": "0.2.2",
   "private": false,
-  "main": "./dist/index.js",
+  "main": "./dist/components/SelectCustom.js",
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
     "@testing-library/jest-dom": "^5.16.5",
