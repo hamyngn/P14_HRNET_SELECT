@@ -50,14 +50,16 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     useCreateRefs(data, setListRef)
     
     /**
-     * open and close list items
+     * handle showList state and change style of select button when options are shown
      */
     const handleShowList = () => {
-        refButton.current.classList.add(`${styles.uiCornerTop}`)
-        setShowList(current => !current)
-        setIsFocus(current => !current)
-        if(showList) {
-            refButton.current.classList.remove(`${styles.uiCornerTop}`) 
+        setShowList(!showList)
+        if (showList) {
+            refButton.current.classList.remove(`${styles.uiCornerTop}`);
+            setIsFocus(true);
+        } else {
+            refButton.current.classList.add(`${styles.uiCornerTop}`);
+            setIsFocus(false);
         }
     }
         
@@ -109,11 +111,21 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     const handleKeyDown = (e) => {
         e.preventDefault()
         let buttonFocused = refButton.current && refButton.current.contains(e.target)
-        if(e.code === "Space") {
-            handleShowList()
+        if(e.target.tagName !== 'LI' && e.code === "Space") {
+            if(showList){ 
+                setShowList(false)
+                refButton.current.classList.remove(`${styles.uiCornerTop}`)
+            } else {
+                setShowList(true)
+                refButton.current.classList.add(`${styles.uiCornerTop}`)
+                listRef[focusedItemIndex].current.focus()
+            }
         }
         if(e.code === "Tab") {
-            refButton.current.parentElement.nextSibling.focus()
+            if(refButton.current.parentElement.nextSibling) {
+                refButton.current.parentElement.nextSibling.focus()
+            }
+            
             if(showList){
                 setShowList(false)
                 refButton.current.classList.remove(`${styles.uiCornerTop}`)
@@ -125,7 +137,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
                 refButton.current.classList.remove(`${styles.uiCornerTop}`)
             }
         }
-        if(e.target.tagName === 'LI' && e.code === "Enter") {
+        if(e.target.tagName === 'LI' && (e.code === "Enter" || e.code === "Space")) {
             listRef[index].current.click()
         }
         // show next item when press ArrowDown or ArrowRight
@@ -207,6 +219,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     <select name={id} id={id} style={{display:"none"}}>
         {options}
     </select>
+    <div ref={refDropDown} style={{marginTop:"10px"}}>
     <span 
     id={`${id}-button`} 
     className={`${styles.selectMenuButton} ${buttonDisabled? styles.disabled: ""}`} 
@@ -224,7 +237,7 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     <span className={styles.selectMenuText}>{selectText ? selectText : buttonText}</span>
     <span className={styles.selectMenuIcon}><SelectIcon className={styles.selectIcon}/></span>
     </span>
-    <div className={styles.dropDownMenu} ref={refDropDown} onKeyDown={(e) => handleKeyDown(e)}>
+    <div className={styles.dropDownMenu} onKeyDown={(e) => handleKeyDown(e)}>
     <ul 
     id={`${id}-menu`} 
     style={showList? {height: "auto"}: {height: "0px", overflow: "hidden"}}
@@ -237,7 +250,8 @@ const SelectCustom = ({label, id, data, value, text, onChange, disabled, hidden,
     >
         {list}
     </ul>
-    </div>      
+    </div>  
+    </div>    
     </div>
 )
 }
