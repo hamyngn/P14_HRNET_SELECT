@@ -137,8 +137,8 @@ const SelectCustom = _ref => {
       }
     }
     if (e.code === "Tab") {
-      if (refButton.current.parentElement.nextSibling) {
-        refButton.current.parentElement.nextSibling.focus();
+      if (refButton.current.parentElement.parentElement.nextSibling) {
+        refButton.current.parentElement.parentElement.nextSibling.focus();
       }
       if (showList) {
         setShowList(false);
